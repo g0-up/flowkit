@@ -1,0 +1,255 @@
+# flowkit public API signatures, version 1.
+#
+# Generated from the compiled packages by
+#   go test -run '^TestFreezeSignatures$' -update-freeze .
+# Do not edit: api_freeze_test.go fails when the exported declarations of
+# the public packages differ from this file. Which identifiers are public is
+# decided by api/freeze-v1.txt; this file pins what they are.
+#
+flowkit: ActionDef: field Execute func(ctx context.Context, in ActionInput) (ActionResult, error)
+flowkit: ActionDef: field Idempotent bool
+flowkit: ActionDef: field Name string
+flowkit: ActionDef: field OutputFacts []OutputFact
+flowkit: ActionDef: field ParamsSchema encoding/json.RawMessage
+flowkit: ActionDef: field Retry RetryPolicy
+flowkit: ActionInput: field IdempotencyKey string
+flowkit: ActionInput: field Params map[string]any
+flowkit: ActionInput: field RunID string
+flowkit: ActionInput: field Scope Scope
+flowkit: ActionInput: field StepID string
+flowkit: ActionResult: field Output map[string]any
+flowkit: Clock: func (Clock).Now() time.Time
+flowkit: ComponentRef: field Kind string
+flowkit: ComponentRef: field Ref string
+flowkit: Config: field ClaimTimeout time.Duration
+flowkit: Config: field Clock Clock
+flowkit: Config: field FactTimeout time.Duration
+flowkit: Config: field InstanceID string
+flowkit: Config: field Logger *log/slog.Logger
+flowkit: Config: field LookbackMargin time.Duration
+flowkit: Config: field MaxPayloadBytes int
+flowkit: Config: field Meter go.opentelemetry.io/otel/metric.MeterProvider
+flowkit: Config: field Pool *github.com/jackc/pgx/v5/pgxpool.Pool
+flowkit: Config: field RedactError func(error) string
+flowkit: Config: field Retention RetentionConfig
+flowkit: Config: field Roles []Role
+flowkit: Config: field Schema string
+flowkit: Config: field Tracer go.opentelemetry.io/otel/trace.TracerProvider
+flowkit: Config: field Workers WorkerConfig
+flowkit: DefinitionRef: field Name string
+flowkit: DefinitionRef: field Version int
+flowkit: DefinitionVersion: field Body encoding/json.RawMessage
+flowkit: DefinitionVersion: field Checksum string
+flowkit: DefinitionVersion: field MetamodelVersion int
+flowkit: DefinitionVersion: field Name string
+flowkit: DefinitionVersion: field Note string
+flowkit: DefinitionVersion: field PublishedAt time.Time
+flowkit: DefinitionVersion: field PublishedBy string
+flowkit: DefinitionVersion: field Version int
+flowkit: Definitions: func (*Definitions).Disable(ctx context.Context, name string) error
+flowkit: Definitions: func (*Definitions).Enable(ctx context.Context, name string) error
+flowkit: Definitions: func (*Definitions).Get(ctx context.Context, name string, version int) (DefinitionVersion, error)
+flowkit: Definitions: func (*Definitions).PinnedRuns(ctx context.Context, name string) (map[int]int, error)
+flowkit: Definitions: func (*Definitions).Publish(ctx context.Context, id DraftID, opts PublishOpts) (Version, error)
+flowkit: Definitions: func (*Definitions).Refs(ctx context.Context, ref ComponentRef) ([]DefinitionRef, error)
+flowkit: Definitions: func (*Definitions).SaveDraft(ctx context.Context, name string, body encoding/json.RawMessage) (DraftID, error)
+flowkit: Definitions: func (*Definitions).Validate(body encoding/json.RawMessage) error
+flowkit: Engine: func (*Engine).Close(ctx context.Context) error
+flowkit: Engine: func (*Engine).Definitions() *Definitions
+flowkit: Engine: func (*Engine).Emit(ctx context.Context, tx github.com/jackc/pgx/v5.Tx, evt Event) error
+flowkit: Engine: func (*Engine).Runs() *Runs
+flowkit: Engine: func (*Engine).Start(ctx context.Context) error
+flowkit: Event: field DedupKey string
+flowkit: Event: field OccurredAt time.Time
+flowkit: Event: field Payload map[string]any
+flowkit: Event: field Type string
+flowkit: EventDef: field DedupKeyField string
+flowkit: EventDef: field EntityIDField string
+flowkit: EventDef: field EntityKind string
+flowkit: EventDef: field PayloadSchema encoding/json.RawMessage
+flowkit: EventDef: field ScopeFields map[string]string
+flowkit: EventDef: field Type string
+flowkit: EventDef: field Version int
+flowkit: FactDef: field AvailableOn []string
+flowkit: FactDef: field Name string
+flowkit: FactDef: field Resolve func(ctx context.Context, q Querier, s Scope) (any, error)
+flowkit: FactDef: field Type FactType
+flowkit: OutputFact: field Name string
+flowkit: OutputFact: field Type FactType
+flowkit: PublishOpts: field Actor string
+flowkit: PublishOpts: field Note string
+flowkit: Querier: func (Querier).Query(ctx context.Context, sql string, args ...any) (github.com/jackc/pgx/v5.Rows, error)
+flowkit: Querier: func (Querier).QueryRow(ctx context.Context, sql string, args ...any) github.com/jackc/pgx/v5.Row
+flowkit: Registry: func (*Registry).MustAddAction(a ActionDef)
+flowkit: Registry: func (*Registry).MustAddEvent(d EventDef)
+flowkit: Registry: func (*Registry).MustAddFact(d FactDef)
+flowkit: Registry: func (*Registry).ValidateDefinition(body encoding/json.RawMessage) error
+flowkit: Resolution: field Actor string
+flowkit: Resolution: field Kind ResolutionKind
+flowkit: Resolution: field Output map[string]any
+flowkit: Resolution: field Reason string
+flowkit: RetentionConfig: field DeadLetter time.Duration
+flowkit: RetentionConfig: field Event time.Duration
+flowkit: RetentionConfig: field Run time.Duration
+flowkit: RetentionConfig: field StepDetail time.Duration
+flowkit: RetryPolicy: field BaseBackoff time.Duration
+flowkit: RetryPolicy: field MaxAttempts int
+flowkit: RetryPolicy: field MaxBackoff time.Duration
+flowkit: RunFilter: field After string
+flowkit: RunFilter: field DefName string
+flowkit: RunFilter: field EntityID string
+flowkit: RunFilter: field EntityKind string
+flowkit: RunFilter: field From time.Time
+flowkit: RunFilter: field Limit int
+flowkit: RunFilter: field States []string
+flowkit: RunFilter: field To time.Time
+flowkit: RunSummary: field Cursor string
+flowkit: RunSummary: field DefName string
+flowkit: RunSummary: field DefVersion int
+flowkit: RunSummary: field EndedAt time.Time
+flowkit: RunSummary: field RunID string
+flowkit: RunSummary: field StartedAt time.Time
+flowkit: RunSummary: field State string
+flowkit: RunSummary: field StepCount int
+flowkit: RunSummary: field TerminalName string
+flowkit: RunSummary: field TriggerEventType string
+flowkit: RunTrace: field LibVersion string
+flowkit: RunTrace: field MetamodelVersion int
+flowkit: RunTrace: field Run RunSummary
+flowkit: RunTrace: field Steps []StepRecord
+flowkit: RunTrace: field TriggerEvent Event
+flowkit: RunTrace: field TriggerEventID int64
+flowkit: Runs: func (*Runs).Cancel(ctx context.Context, runID string, reason string) error
+flowkit: Runs: func (*Runs).List(ctx context.Context, f RunFilter) ([]RunSummary, error)
+flowkit: Runs: func (*Runs).ResolveDeadLetter(ctx context.Context, id int64, res Resolution) error
+flowkit: Runs: func (*Runs).Trace(ctx context.Context, runID string) (RunTrace, error)
+flowkit: Scope: field EntityID string
+flowkit: Scope: field EntityKind string
+flowkit: Scope: field Extra map[string]string
+flowkit: StepRecord: field At time.Time
+flowkit: StepRecord: field Attempt int
+flowkit: StepRecord: field Detail string
+flowkit: StepRecord: field Error string
+flowkit: StepRecord: field Kind string
+flowkit: StepRecord: field Seq int
+flowkit: StepRecord: field Snapshot map[string]any
+flowkit: StepRecord: field StepID string
+flowkit: ValidationError: field Msg string
+flowkit: ValidationError: field Path string
+flowkit: ValidationError: func (*ValidationError).Error() string
+flowkit: ValidationErrors: func (ValidationErrors).Error() string
+flowkit: ValidationErrors: func (ValidationErrors).Unwrap() []error
+flowkit: WorkerConfig: field EffectRateLimit float64
+flowkit: WorkerConfig: field MaxWorkers int
+flowkit: WorkerConfig: field PollInterval time.Duration
+flowkit: WorkerConfig: field PollOnly bool
+flowkit: const ComponentAction untyped string = "action"
+flowkit: const ComponentEvent untyped string = "event"
+flowkit: const ComponentFact untyped string = "fact"
+flowkit: const FactBool FactType = 1
+flowkit: const FactDouble FactType = 3
+flowkit: const FactInt FactType = 2
+flowkit: const FactString FactType = 4
+flowkit: const FactTimestamp FactType = 5
+flowkit: const ResolveMarkDone ResolutionKind = 2
+flowkit: const ResolveRedrive ResolutionKind = 1
+flowkit: const ResolveSkip ResolutionKind = 3
+flowkit: const RoleJanitor Role = 1
+flowkit: const RoleWorker Role = 0
+flowkit: func New(cfg Config, reg *Registry) (*Engine, error)
+flowkit: func NewRegistry() *Registry
+flowkit: func NotPerformed(err error) error
+flowkit: type ActionDef struct
+flowkit: type ActionInput struct
+flowkit: type ActionResult struct
+flowkit: type Clock interface
+flowkit: type ComponentRef struct
+flowkit: type Config struct
+flowkit: type DefinitionRef struct
+flowkit: type DefinitionVersion struct
+flowkit: type Definitions struct
+flowkit: type DraftID string
+flowkit: type Engine struct
+flowkit: type Event struct
+flowkit: type EventDef struct
+flowkit: type FactDef struct
+flowkit: type FactType int
+flowkit: type OutputFact struct
+flowkit: type PublishOpts struct
+flowkit: type Querier interface
+flowkit: type Registry struct
+flowkit: type Resolution struct
+flowkit: type ResolutionKind int
+flowkit: type RetentionConfig struct
+flowkit: type RetryPolicy struct
+flowkit: type Role int
+flowkit: type RunFilter struct
+flowkit: type RunSummary struct
+flowkit: type RunTrace struct
+flowkit: type Runs struct
+flowkit: type Scope struct
+flowkit: type StepRecord struct
+flowkit: type ValidationError struct
+flowkit: type ValidationErrors []*ValidationError
+flowkit: type Version int
+flowkit: type WorkerConfig struct
+flowkit: var ErrAlreadyResolved error
+flowkit: var ErrDefinitionDisabled error
+flowkit: var ErrDuplicateEvent error
+flowkit: var ErrNotFound error
+flowkit: var ErrSchemaDrift error
+flowkit: var ErrUnknownEvent error
+flowkittest: PGHarness: func (*PGHarness).Advance(d time.Duration)
+flowkittest: PGHarness: func (*PGHarness).Clock() *VirtualClock
+flowkittest: PGHarness: func (*PGHarness).Emit(evt github.com/g0-up/flowkit.Event)
+flowkittest: PGHarness: func (*PGHarness).Engine() *github.com/g0-up/flowkit.Engine
+flowkittest: PGHarness: func (*PGHarness).Publish(name string, body encoding/json.RawMessage) github.com/g0-up/flowkit.Version
+flowkittest: PGHarness: func (*PGHarness).Run(runID string) RunView
+flowkittest: PGHarness: func (*PGHarness).WaitIdle(timeout time.Duration)
+flowkittest: RunView: field Facts map[string]any
+flowkittest: RunView: field State string
+flowkittest: RunView: field TerminalName string
+flowkittest: RunView: field WaitStep string
+flowkittest: Sim: func (*Sim).Advance(d time.Duration)
+flowkittest: Sim: func (*Sim).Clock() *VirtualClock
+flowkittest: Sim: func (*Sim).Emit(evt github.com/g0-up/flowkit.Event)
+flowkittest: Sim: func (*Sim).Publish(name string, body encoding/json.RawMessage) github.com/g0-up/flowkit.Version
+flowkittest: Sim: func (*Sim).Runs() *github.com/g0-up/flowkit.Runs
+flowkittest: Sim: func (*Sim).StubAction(action string, fn StubFunc)
+flowkittest: VirtualClock: func (*VirtualClock).Advance(d time.Duration)
+flowkittest: VirtualClock: func (*VirtualClock).Now() time.Time
+flowkittest: VirtualClock: func (*VirtualClock).Set(t time.Time)
+flowkittest: func AssertTrace(t testing.TB, runs *github.com/g0-up/flowkit.Runs, runID string, ms ...Matcher)
+flowkittest: func DeadLetter(kind string) Matcher
+flowkittest: func HarnessConfig(cfg github.com/g0-up/flowkit.Config) HarnessOption
+flowkittest: func HarnessStart(start time.Time) HarnessOption
+flowkittest: func NewPGHarness(t testing.TB, reg *github.com/g0-up/flowkit.Registry, opts ...HarnessOption) *PGHarness
+flowkittest: func NewSim(t testing.TB, reg *github.com/g0-up/flowkit.Registry, opts ...SimOption) *Sim
+flowkittest: func NewVirtualClock(start time.Time) *VirtualClock
+flowkittest: func RunFailed(reason string) Matcher
+flowkittest: func RunTerminal(name string) Matcher
+flowkittest: func RunWaiting(stepID string) Matcher
+flowkittest: func SimConfig(cfg github.com/g0-up/flowkit.Config) SimOption
+flowkittest: func SimStart(start time.Time) SimOption
+flowkittest: func StepExecuted(stepID string) Matcher
+flowkittest: func StepExecutedTimes(stepID string, n int) Matcher
+flowkittest: func StepSkipped(stepID string, reason string) Matcher
+flowkittest: type HarnessOption func(*harnessConfig)
+flowkittest: type Matcher struct
+flowkittest: type PGHarness struct
+flowkittest: type RunView struct
+flowkittest: type Sim struct
+flowkittest: type SimOption func(*simConfig)
+flowkittest: type StubFunc func(ctx context.Context, in github.com/g0-up/flowkit.ActionInput) (github.com/g0-up/flowkit.ActionResult, error)
+flowkittest: type VirtualClock struct
+migrate: Options: field ConfirmNonEmpty bool
+migrate: State: field MinLibSchema int
+migrate: State: field Pending []string
+migrate: State: field RiverVersion int
+migrate: State: field SchemaVersion int
+migrate: func Run(ctx context.Context, pool *github.com/jackc/pgx/v5/pgxpool.Pool, schema string, opts Options) error
+migrate: func Status(ctx context.Context, pool *github.com/jackc/pgx/v5/pgxpool.Pool, schema string) (State, error)
+migrate: type Options struct
+migrate: type State struct
+migrate: var ErrConfirmationRequired error
+migrate: var ErrForeignSchema error

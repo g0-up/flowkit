@@ -1,0 +1,8 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "student.enrolled"},
+  "steps": [
+    {"id": "route", "type": "switch", "cases": [{"when": "facts.customer.is_vip", "next": "done"}], "default": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

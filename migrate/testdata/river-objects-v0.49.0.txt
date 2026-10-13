@@ -1,0 +1,60 @@
+# Database objects River v0.49.0 leaves in its schema after rivermigrate (line main).
+# Applied migration versions: 001, 002, 003, 004, 005, 006, 007, 008.
+# Captured from the PostgreSQL 16 system catalogs with search_path set to the
+# River schema, so names are unqualified and independent of the schema name.
+# Regenerate: make pg-up, then
+#   go test -tags spike ./internal/spike/river -run TestRiverObjectCatalogMatchesAllowlist -update-allowlist
+column_default river_job.attempt: 0
+column_default river_job.created_at: now()
+column_default river_job.id: nextval('river_job_id_seq'::regclass)
+column_default river_job.max_attempts: 25
+column_default river_job.metadata: '{}'::jsonb
+column_default river_job.priority: 1
+column_default river_job.queue: 'default'::text
+column_default river_job.scheduled_at: now()
+column_default river_job.state: 'available'::river_job_state
+column_default river_job.tags: '{}'::character varying[]
+column_default river_leader.name: 'default'::text
+column_default river_migration.created_at: now()
+column_default river_notification.created_at: now()
+column_default river_notification.id: nextval('river_notification_id_seq'::regclass)
+column_default river_queue.created_at: now()
+column_default river_queue.metadata: '{}'::jsonb
+column_default river_queue.updated_at: CURRENT_TIMESTAMP
+constraint river_job.finalized_or_finalized_at_null: CHECK ((((finalized_at IS NULL) AND (state <> ALL (ARRAY['cancelled'::river_job_state, 'completed'::river_job_state, 'discarded'::river_job_state]))) OR ((finalized_at IS NOT NULL) AND (state = ANY (ARRAY['cancelled'::river_job_state, 'completed'::river_job_state, 'discarded'::river_job_state])))))
+constraint river_job.kind_length: CHECK (((char_length(kind) > 0) AND (char_length(kind) < 128)))
+constraint river_job.max_attempts_is_positive: CHECK ((max_attempts > 0))
+constraint river_job.priority_in_range: CHECK (((priority >= 1) AND (priority <= 4)))
+constraint river_job.queue_length: CHECK (((char_length(queue) > 0) AND (char_length(queue) < 128)))
+constraint river_job.river_job_pkey: PRIMARY KEY (id)
+constraint river_leader.leader_id_length: CHECK (((char_length(leader_id) > 0) AND (char_length(leader_id) < 128)))
+constraint river_leader.name_length: CHECK ((name = 'default'::text))
+constraint river_leader.river_leader_pkey: PRIMARY KEY (name)
+constraint river_migration.line_length: CHECK (((char_length(line) > 0) AND (char_length(line) < 128)))
+constraint river_migration.river_migration_pkey1: PRIMARY KEY (line, version)
+constraint river_migration.version_gte_1: CHECK ((version >= 1))
+constraint river_notification.river_notification_pkey: PRIMARY KEY (id)
+constraint river_notification.topic_length: CHECK (((length(topic) > 0) AND (length(topic) < 128)))
+constraint river_queue.river_queue_pkey: PRIMARY KEY (name)
+enum river_job_state: available,cancelled,completed,discarded,pending,retryable,running,scheduled
+function river_job_state_in_bitmask(bit,river_job_state) returns boolean language=sql volatility=i body_md5=7564bd691aa4fe9f1d890d980123935c
+index river_job_args_index: CREATE INDEX river_job_args_index ON river_job USING gin (args)
+index river_job_kind: CREATE INDEX river_job_kind ON river_job USING btree (kind)
+index river_job_metadata_index: CREATE INDEX river_job_metadata_index ON river_job USING gin (metadata)
+index river_job_pkey: CREATE UNIQUE INDEX river_job_pkey ON river_job USING btree (id)
+index river_job_prioritized_fetching_index: CREATE INDEX river_job_prioritized_fetching_index ON river_job USING btree (state, queue, priority, scheduled_at, id)
+index river_job_state_and_finalized_at_index: CREATE INDEX river_job_state_and_finalized_at_index ON river_job USING btree (state, finalized_at) WHERE (finalized_at IS NOT NULL)
+index river_job_unique_idx: CREATE UNIQUE INDEX river_job_unique_idx ON river_job USING btree (unique_key) WHERE ((unique_key IS NOT NULL) AND (unique_states IS NOT NULL) AND river_job_state_in_bitmask(unique_states, state))
+index river_leader_pkey: CREATE UNIQUE INDEX river_leader_pkey ON river_leader USING btree (name)
+index river_migration_pkey1: CREATE UNIQUE INDEX river_migration_pkey1 ON river_migration USING btree (line, version)
+index river_notification_created_at_idx: CREATE INDEX river_notification_created_at_idx ON river_notification USING btree (created_at)
+index river_notification_pkey: CREATE UNIQUE INDEX river_notification_pkey ON river_notification USING btree (id)
+index river_notification_topic_id_idx: CREATE INDEX river_notification_topic_id_idx ON river_notification USING btree (topic, id)
+index river_queue_pkey: CREATE UNIQUE INDEX river_queue_pkey ON river_queue USING btree (name)
+sequence river_job_id_seq
+sequence river_notification_id_seq
+table river_job
+table river_leader UNLOGGED
+table river_migration
+table river_notification
+table river_queue

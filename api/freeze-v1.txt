@@ -1,0 +1,142 @@
+# flowkit public API, version 1.
+#
+# Transcribed by hand from the Owner-approved freeze list in
+# adr/flowkit_design_system.md, Appendix A. It is not generated from code:
+# api_freeze_test.go fails when the exported identifiers of the packages below
+# differ from this file. Edit it only together with the appendix.
+#
+# One identifier per line: "package <name>" starts a section, then
+# "<kind> <name>" with kind one of type, const, var, func, and
+# "method <Type>.<Name>" for methods of the type or its pointer. Struct fields
+# are not listed: adding a field is a minor change.
+
+package flowkit
+type Clock
+type Config
+type WorkerConfig
+type RetentionConfig
+type Engine
+type Role
+type Registry
+type Event
+type EventDef
+type ActionDef
+type ActionInput
+type ActionResult
+type RetryPolicy
+type OutputFact
+type FactDef
+type FactType
+type Scope
+type Querier
+type Definitions
+type PublishOpts
+type DraftID
+type Version
+type DefinitionVersion
+type DefinitionRef
+type ComponentRef
+type Runs
+type RunTrace
+type RunSummary
+type RunFilter
+type StepRecord
+type Resolution
+type ResolutionKind
+type ValidationError
+type ValidationErrors
+const RoleWorker
+const RoleJanitor
+const FactBool
+const FactInt
+const FactDouble
+const FactString
+const FactTimestamp
+const ResolveRedrive
+const ResolveMarkDone
+const ResolveSkip
+const ComponentEvent
+const ComponentAction
+const ComponentFact
+func New
+func NewRegistry
+func NotPerformed
+method Engine.Start
+method Engine.Close
+method Engine.Emit
+method Engine.Definitions
+method Engine.Runs
+method Registry.MustAddEvent
+method Registry.MustAddAction
+method Registry.MustAddFact
+method Registry.ValidateDefinition
+method Definitions.Validate
+method Definitions.SaveDraft
+method Definitions.Publish
+method Definitions.Enable
+method Definitions.Disable
+method Definitions.Get
+method Definitions.Refs
+method Definitions.PinnedRuns
+method Runs.Trace
+method Runs.List
+method Runs.Cancel
+method Runs.ResolveDeadLetter
+method ValidationError.Error
+method ValidationErrors.Error
+method ValidationErrors.Unwrap
+var ErrDuplicateEvent
+var ErrSchemaDrift
+var ErrDefinitionDisabled
+var ErrNotFound
+var ErrUnknownEvent
+var ErrAlreadyResolved
+
+package migrate
+type Options
+type State
+func Run
+func Status
+var ErrConfirmationRequired
+var ErrForeignSchema
+
+package flowkittest
+type VirtualClock
+type PGHarness
+type HarnessOption
+type RunView
+type Sim
+type SimOption
+type StubFunc
+type Matcher
+func NewVirtualClock
+func NewPGHarness
+func HarnessStart
+func HarnessConfig
+func NewSim
+func SimStart
+func SimConfig
+func AssertTrace
+func StepSkipped
+func StepExecuted
+func StepExecutedTimes
+func RunTerminal
+func RunWaiting
+func RunFailed
+func DeadLetter
+method VirtualClock.Now
+method VirtualClock.Advance
+method VirtualClock.Set
+method PGHarness.Engine
+method PGHarness.Clock
+method PGHarness.Emit
+method PGHarness.Publish
+method PGHarness.Advance
+method PGHarness.WaitIdle
+method PGHarness.Run
+method Sim.StubAction
+method Sim.Publish
+method Sim.Emit
+method Sim.Advance
+method Sim.Runs
+method Sim.Clock

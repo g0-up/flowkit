@@ -1,0 +1,6 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "concurrency": {"policy": "dedup_window", "serial_key": "event.customer_id"},
+  "steps": [{"id": "done", "type": "end", "name": "done"}]
+}

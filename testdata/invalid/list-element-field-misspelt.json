@@ -1,0 +1,9 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "route", "type": "switch",
+     "cases": [{"when": "event.items.exists(i, i.quantity > 1)", "next": "done"}], "default": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

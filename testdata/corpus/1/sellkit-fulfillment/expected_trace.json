@@ -1,0 +1,808 @@
+{
+  "runs": [
+    {
+      "definition": "sellkit-fulfillment",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "order.paid",
+        "payload": {
+          "customer_id": "c-vip",
+          "email": "vip@example.com",
+          "items": [
+            {
+              "qty": 2,
+              "sku": "lamp"
+            }
+          ],
+          "order_id": "vip-1001",
+          "shipping": {
+            "country": "SG",
+            "express": false
+          },
+          "total": 250.5
+        },
+        "occurred_at": "+0s"
+      },
+      "state": "completed",
+      "terminal": "fulfilled",
+      "started": "+0s",
+      "ended": "+24h0m0s",
+      "steps": [
+        {
+          "at": "+0s",
+          "step": "reserve",
+          "kind": "entered",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "reserve",
+          "kind": "executed",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "reserve:1",
+            "next": "in_stock",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "in_stock",
+          "kind": "branched",
+          "detail": "ship",
+          "snapshot": {
+            "case": "default",
+            "facts": {
+              "inventory.reserved": true
+            },
+            "next": "ship",
+            "now": "2030-01-01T00:00:00Z"
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "ship",
+          "kind": "entered",
+          "detail": "create_shipment",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "ship",
+          "kind": "executed",
+          "detail": "create_shipment",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "ship:1",
+            "next": "notify_shipped",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "notify_shipped",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "notify_shipped",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "notify_shipped:1",
+            "next": "delivered",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "delivered",
+          "kind": "waiting",
+          "detail": "shipment.delivered",
+          "snapshot": {
+            "due_at": "2030-01-15T00:00:00Z",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "delivered",
+          "kind": "claimed",
+          "detail": "event 6",
+          "snapshot": {
+            "event_id": 6,
+            "next": "thank_vip",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "thank_vip",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {
+              "customer.lifetime_value": 2500
+            },
+            "now": "2030-01-02T00:00:00Z",
+            "visit": 1,
+            "when": "facts.customer.lifetime_value > 1000.0 && event.items.exists(i, i.qty >= 2)"
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "thank_vip",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "thank_vip:1",
+            "next": "fulfilled",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "fulfilled",
+          "kind": "terminal",
+          "detail": "fulfilled"
+        },
+        {
+          "at": "+336h0m0s",
+          "step": "delivered",
+          "kind": "claim_lost",
+          "detail": "timeout",
+          "snapshot": {
+            "wait_seq": 1
+          }
+        }
+      ],
+      "calls": [
+        {
+          "step": "reserve",
+          "action": "reserve_inventory",
+          "key": "reserve:1",
+          "params": {
+            "order_id": "vip-1001",
+            "skus": [
+              "lamp"
+            ],
+            "units": [
+              2
+            ]
+          }
+        },
+        {
+          "step": "ship",
+          "action": "create_shipment",
+          "key": "ship:1",
+          "params": {
+            "country": "SG",
+            "express": true,
+            "order_id": "vip-1001"
+          }
+        },
+        {
+          "step": "notify_shipped",
+          "action": "send_email",
+          "key": "notify_shipped:1",
+          "params": {
+            "template": "order_shipped",
+            "to": "vip@example.com",
+            "vars": {
+              "order": "vip-1001",
+              "tracking": "TRK-vip-1001"
+            }
+          }
+        },
+        {
+          "step": "thank_vip",
+          "action": "send_email",
+          "key": "thank_vip:1",
+          "params": {
+            "template": "vip_thanks",
+            "to": "vip@example.com"
+          }
+        }
+      ]
+    },
+    {
+      "definition": "sellkit-fulfillment",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "order.paid",
+        "payload": {
+          "customer_id": "c-regular",
+          "email": "regular@example.com",
+          "items": [
+            {
+              "qty": 1,
+              "sku": "mug"
+            }
+          ],
+          "order_id": "o-2001",
+          "total": 40
+        },
+        "occurred_at": "+0s"
+      },
+      "state": "completed",
+      "terminal": "fulfilled",
+      "started": "+0s",
+      "ended": "+24h0m0s",
+      "steps": [
+        {
+          "at": "+0s",
+          "step": "reserve",
+          "kind": "entered",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "reserve",
+          "kind": "executed",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "reserve:1",
+            "next": "in_stock",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "in_stock",
+          "kind": "branched",
+          "detail": "ship",
+          "snapshot": {
+            "case": "default",
+            "facts": {
+              "inventory.reserved": true
+            },
+            "next": "ship",
+            "now": "2030-01-01T00:00:00Z"
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "ship",
+          "kind": "entered",
+          "detail": "create_shipment",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "ship",
+          "kind": "executed",
+          "detail": "create_shipment",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "ship:1",
+            "next": "notify_shipped",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "notify_shipped",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "notify_shipped",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "notify_shipped:1",
+            "next": "delivered",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "delivered",
+          "kind": "waiting",
+          "detail": "shipment.delivered",
+          "snapshot": {
+            "due_at": "2030-01-15T00:00:00Z",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "delivered",
+          "kind": "claimed",
+          "detail": "event 7",
+          "snapshot": {
+            "event_id": 7,
+            "next": "thank_vip",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "thank_vip",
+          "kind": "skipped",
+          "detail": "when is false",
+          "snapshot": {
+            "facts": {
+              "customer.lifetime_value": 120
+            },
+            "next": "fulfilled",
+            "now": "2030-01-02T00:00:00Z",
+            "when": "facts.customer.lifetime_value > 1000.0 && event.items.exists(i, i.qty >= 2)"
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "fulfilled",
+          "kind": "terminal",
+          "detail": "fulfilled"
+        },
+        {
+          "at": "+336h0m0s",
+          "step": "delivered",
+          "kind": "claim_lost",
+          "detail": "timeout",
+          "snapshot": {
+            "wait_seq": 1
+          }
+        }
+      ],
+      "calls": [
+        {
+          "step": "reserve",
+          "action": "reserve_inventory",
+          "key": "reserve:1",
+          "params": {
+            "order_id": "o-2001",
+            "skus": [
+              "mug"
+            ],
+            "units": [
+              1
+            ]
+          }
+        },
+        {
+          "step": "ship",
+          "action": "create_shipment",
+          "key": "ship:1",
+          "params": {
+            "country": "VN",
+            "express": false,
+            "order_id": "o-2001"
+          }
+        },
+        {
+          "step": "notify_shipped",
+          "action": "send_email",
+          "key": "notify_shipped:1",
+          "params": {
+            "template": "order_shipped",
+            "to": "regular@example.com",
+            "vars": {
+              "order": "o-2001",
+              "tracking": "TRK-o-2001"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "definition": "sellkit-fulfillment",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "order.paid",
+        "payload": {
+          "customer_id": "c-regular",
+          "email": "regular@example.com",
+          "items": [
+            {
+              "qty": 3,
+              "sku": "spoon"
+            }
+          ],
+          "order_id": "o-2002",
+          "total": 12
+        },
+        "occurred_at": "+0s"
+      },
+      "state": "completed",
+      "terminal": "overdue",
+      "started": "+24h0m0s",
+      "ended": "+360h0m0s",
+      "steps": [
+        {
+          "at": "+24h0m0s",
+          "step": "reserve",
+          "kind": "entered",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-02T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "reserve",
+          "kind": "executed",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "reserve:1",
+            "next": "in_stock",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "in_stock",
+          "kind": "branched",
+          "detail": "ship",
+          "snapshot": {
+            "case": "default",
+            "facts": {
+              "inventory.reserved": true
+            },
+            "next": "ship",
+            "now": "2030-01-02T00:00:00Z"
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "ship",
+          "kind": "entered",
+          "detail": "create_shipment",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-02T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "ship",
+          "kind": "executed",
+          "detail": "create_shipment",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "ship:1",
+            "next": "notify_shipped",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "notify_shipped",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-02T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "notify_shipped",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "notify_shipped:1",
+            "next": "delivered",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+24h0m0s",
+          "step": "delivered",
+          "kind": "waiting",
+          "detail": "shipment.delivered",
+          "snapshot": {
+            "due_at": "2030-01-16T00:00:00Z",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+360h0m0s",
+          "step": "delivered",
+          "kind": "claimed",
+          "detail": "timeout",
+          "snapshot": {
+            "next": "escalate",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+360h0m0s",
+          "step": "escalate",
+          "kind": "entered",
+          "detail": "open_ticket",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-16T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+360h0m0s",
+          "step": "escalate",
+          "kind": "executed",
+          "detail": "open_ticket",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "escalate:1",
+            "next": "overdue",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+360h0m0s",
+          "step": "overdue",
+          "kind": "terminal",
+          "detail": "overdue"
+        }
+      ],
+      "calls": [
+        {
+          "step": "reserve",
+          "action": "reserve_inventory",
+          "key": "reserve:1",
+          "params": {
+            "order_id": "o-2002",
+            "skus": [
+              "spoon"
+            ],
+            "units": [
+              3
+            ]
+          }
+        },
+        {
+          "step": "ship",
+          "action": "create_shipment",
+          "key": "ship:1",
+          "params": {
+            "country": "VN",
+            "express": false,
+            "order_id": "o-2002"
+          }
+        },
+        {
+          "step": "notify_shipped",
+          "action": "send_email",
+          "key": "notify_shipped:1",
+          "params": {
+            "template": "order_shipped",
+            "to": "regular@example.com",
+            "vars": {
+              "order": "o-2002",
+              "tracking": "TRK-o-2002"
+            }
+          }
+        },
+        {
+          "step": "escalate",
+          "action": "open_ticket",
+          "key": "escalate:1",
+          "params": {
+            "order_id": "o-2002",
+            "priority": 2,
+            "reason": "delivery_overdue"
+          }
+        }
+      ]
+    },
+    {
+      "definition": "sellkit-fulfillment",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "order.paid",
+        "payload": {
+          "customer_id": "c-unlucky",
+          "email": "unlucky@example.com",
+          "items": [
+            {
+              "qty": 1,
+              "sku": "oos-chair"
+            },
+            {
+              "qty": 1,
+              "sku": "mug"
+            }
+          ],
+          "order_id": "o-3001",
+          "total": 99.9
+        },
+        "occurred_at": "+0s"
+      },
+      "state": "completed",
+      "terminal": "refunded",
+      "started": "+0s",
+      "ended": "+0s",
+      "steps": [
+        {
+          "at": "+0s",
+          "step": "reserve",
+          "kind": "entered",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "reserve",
+          "kind": "executed",
+          "detail": "reserve_inventory",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "reserve:1",
+            "next": "in_stock",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "in_stock",
+          "kind": "branched",
+          "detail": "refund",
+          "snapshot": {
+            "case": 0,
+            "facts": {
+              "inventory.reserved": false
+            },
+            "next": "refund",
+            "now": "2030-01-01T00:00:00Z",
+            "when": "!facts.inventory.reserved"
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "refund",
+          "kind": "entered",
+          "detail": "refund_order",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "refund",
+          "kind": "executed",
+          "detail": "refund_order",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "refund:1",
+            "next": "notify_refund",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "notify_refund",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "notify_refund",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "notify_refund:1",
+            "next": "refunded",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "refunded",
+          "kind": "terminal",
+          "detail": "refunded"
+        }
+      ],
+      "calls": [
+        {
+          "step": "reserve",
+          "action": "reserve_inventory",
+          "key": "reserve:1",
+          "params": {
+            "order_id": "o-3001",
+            "skus": [
+              "oos-chair",
+              "mug"
+            ],
+            "units": [
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "step": "refund",
+          "action": "refund_order",
+          "key": "refund:1",
+          "params": {
+            "amount": 99.9,
+            "order_id": "o-3001"
+          }
+        },
+        {
+          "step": "notify_refund",
+          "action": "send_email",
+          "key": "notify_refund:1",
+          "params": {
+            "template": "order_refunded",
+            "to": "unlucky@example.com",
+            "vars": {
+              "order": "o-3001"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

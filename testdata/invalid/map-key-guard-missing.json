@@ -1,0 +1,11 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "student.enrolled"},
+  "steps": [
+    {"id": "welcome", "type": "action", "action": "send_email",
+     "params": {"to": {"$expr": "event.email"}, "template": "welcome",
+                "vars": {"school": {"$expr": "scope.extra['school']"}}},
+     "next": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

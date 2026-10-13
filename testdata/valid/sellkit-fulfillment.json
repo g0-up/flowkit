@@ -1,0 +1,88 @@
+{
+  "metamodel_version": 1,
+  "description": "Sellkit: reserve stock for a paid order, ship it, follow the delivery, refund when out of stock",
+  "trigger": {"event": "order.paid"},
+  "concurrency": {"policy": "serial", "serial_key": "event.customer_id"},
+  "steps": [
+    {
+      "id": "reserve",
+      "type": "action",
+      "action": "reserve_inventory",
+      "params": {
+        "order_id": {"$expr": "event.order_id"},
+        "skus": {"$expr": "event.items.map(i, i.sku)"},
+        "units": {"$expr": "event.items.map(i, i.qty)"}
+      },
+      "next": "in_stock"
+    },
+    {
+      "id": "in_stock",
+      "type": "switch",
+      "cases": [{"when": "!facts.inventory.reserved", "next": "refund"}],
+      "default": "ship"
+    },
+    {
+      "id": "ship",
+      "type": "action",
+      "action": "create_shipment",
+      "params": {
+        "order_id": {"$expr": "event.order_id"},
+        "express": {"$expr": "facts.customer.is_vip || (has(event.shipping) && has(event.shipping.express) && event.shipping.express)"},
+        "country": {"$expr": "has(event.shipping) ? event.shipping.country : 'VN'"}
+      },
+      "next": "notify_shipped"
+    },
+    {
+      "id": "notify_shipped",
+      "type": "action",
+      "action": "send_email",
+      "params": {
+        "to": {"$expr": "event.email"},
+        "template": "order_shipped",
+        "vars": {"order": {"$expr": "event.order_id"}, "tracking": {"$expr": "facts.shipment.tracking"}}
+      },
+      "next": "delivered"
+    },
+    {
+      "id": "delivered",
+      "type": "wait_for_event",
+      "event": "shipment.delivered",
+      "match": "event.order_id == scope.entity_id && (!has(event.carrier) || event.carrier != 'test')",
+      "timeout": "14d",
+      "on_timeout": "escalate",
+      "next": "thank_vip"
+    },
+    {
+      "id": "thank_vip",
+      "type": "action",
+      "action": "send_email",
+      "when": "facts.customer.lifetime_value > 1000.0 && event.items.exists(i, i.qty >= 2)",
+      "params": {"to": {"$expr": "event.email"}, "template": "vip_thanks"},
+      "next": "fulfilled"
+    },
+    {
+      "id": "escalate",
+      "type": "action",
+      "action": "open_ticket",
+      "params": {"order_id": {"$expr": "event.order_id"}, "reason": "delivery_overdue", "priority": 2},
+      "next": "overdue"
+    },
+    {
+      "id": "refund",
+      "type": "action",
+      "action": "refund_order",
+      "params": {"order_id": {"$expr": "event.order_id"}, "amount": {"$expr": "event.total"}},
+      "next": "notify_refund"
+    },
+    {
+      "id": "notify_refund",
+      "type": "action",
+      "action": "send_email",
+      "params": {"to": {"$expr": "event.email"}, "template": "order_refunded", "vars": {"order": {"$expr": "event.order_id"}}},
+      "next": "refunded"
+    },
+    {"id": "fulfilled", "type": "end", "name": "fulfilled"},
+    {"id": "overdue", "type": "end", "name": "overdue"},
+    {"id": "refunded", "type": "end", "name": "refunded"}
+  ]
+}

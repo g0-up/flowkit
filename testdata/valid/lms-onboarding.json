@@ -1,0 +1,59 @@
+{
+  "metamodel_version": 1,
+  "description": "LMS: welcome a new student, assign a mentor to first-timers, and nudge them until they finish a first lesson",
+  "trigger": {"event": "student.enrolled"},
+  "concurrency": {"policy": "dedup_window", "serial_key": "event.student_id + '/' + event.course_id", "dedup_window": "1h"},
+  "steps": [
+    {
+      "id": "welcome",
+      "type": "action",
+      "action": "send_email",
+      "params": {
+        "to": {"$expr": "event.email"},
+        "template": "welcome",
+        "vars": {
+          "name": {"$expr": "has(event.name) ? event.name : 'there'"},
+          "course": {"$expr": "event.course_id"}
+        }
+      },
+      "next": "mentor"
+    },
+    {
+      "id": "mentor",
+      "type": "action",
+      "action": "assign_mentor",
+      "when": "facts.student.prior_courses == 0",
+      "params": {"student_id": {"$expr": "event.student_id"}, "course_id": {"$expr": "event.course_id"}},
+      "next": "first_lesson"
+    },
+    {
+      "id": "first_lesson",
+      "type": "wait_for_event",
+      "event": "lesson.completed",
+      "match": "event.student_id == scope.entity_id && has(event.score) && event.score >= 50",
+      "timeout": "7d",
+      "on_timeout": "nudge",
+      "next": "badge"
+    },
+    {
+      "id": "nudge",
+      "type": "action",
+      "action": "send_email",
+      "params": {
+        "to": {"$expr": "event.email"},
+        "template": "nudge",
+        "vars": {"mentor": {"$expr": "has(facts.mentor.id) ? facts.mentor.id : 'the team'"}}
+      },
+      "next": "nudged"
+    },
+    {
+      "id": "badge",
+      "type": "action",
+      "action": "grant_badge",
+      "params": {"student_id": {"$expr": "event.student_id"}, "badge": "first_steps"},
+      "next": "onboarded"
+    },
+    {"id": "onboarded", "type": "end", "name": "onboarded"},
+    {"id": "nudged", "type": "end", "name": "nudged"}
+  ]
+}

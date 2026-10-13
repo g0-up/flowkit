@@ -1,0 +1,624 @@
+{
+  "runs": [
+    {
+      "definition": "lms-onboarding",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "student.enrolled",
+        "payload": {
+          "course_id": "go-101",
+          "email": "new@example.com",
+          "name": "An",
+          "school_id": "hn",
+          "student_id": "s-new"
+        },
+        "occurred_at": "+0s"
+      },
+      "state": "completed",
+      "terminal": "onboarded",
+      "started": "+0s",
+      "ended": "+2h0m0s",
+      "steps": [
+        {
+          "at": "+0s",
+          "step": "welcome",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "welcome",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "welcome:1",
+            "next": "mentor",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "mentor",
+          "kind": "entered",
+          "detail": "assign_mentor",
+          "snapshot": {
+            "facts": {
+              "student.prior_courses": 0
+            },
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": "facts.student.prior_courses == 0"
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "mentor",
+          "kind": "executed",
+          "detail": "assign_mentor",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "mentor:1",
+            "next": "first_lesson",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "first_lesson",
+          "kind": "waiting",
+          "detail": "lesson.completed",
+          "snapshot": {
+            "due_at": "2030-01-08T00:00:00Z",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "first_lesson",
+          "kind": "claimed",
+          "detail": "event 6",
+          "snapshot": {
+            "event_id": 6,
+            "next": "badge",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "badge",
+          "kind": "entered",
+          "detail": "grant_badge",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T02:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "badge",
+          "kind": "executed",
+          "detail": "grant_badge",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "badge:1",
+            "next": "onboarded",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "onboarded",
+          "kind": "terminal",
+          "detail": "onboarded"
+        },
+        {
+          "at": "+168h0m0s",
+          "step": "first_lesson",
+          "kind": "claim_lost",
+          "detail": "timeout",
+          "snapshot": {
+            "wait_seq": 1
+          }
+        }
+      ],
+      "calls": [
+        {
+          "step": "welcome",
+          "action": "send_email",
+          "key": "welcome:1",
+          "params": {
+            "template": "welcome",
+            "to": "new@example.com",
+            "vars": {
+              "course": "go-101",
+              "name": "An"
+            }
+          }
+        },
+        {
+          "step": "mentor",
+          "action": "assign_mentor",
+          "key": "mentor:1",
+          "params": {
+            "course_id": "go-101",
+            "student_id": "s-new"
+          }
+        },
+        {
+          "step": "badge",
+          "action": "grant_badge",
+          "key": "badge:1",
+          "params": {
+            "badge": "first_steps",
+            "student_id": "s-new"
+          }
+        }
+      ]
+    },
+    {
+      "definition": "lms-onboarding",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "student.enrolled",
+        "payload": {
+          "course_id": "go-101",
+          "email": "s7@example.com",
+          "student_id": "returning-s7"
+        },
+        "occurred_at": "+0s"
+      },
+      "state": "completed",
+      "terminal": "nudged",
+      "started": "+0s",
+      "ended": "+168h0m0s",
+      "steps": [
+        {
+          "at": "+0s",
+          "step": "welcome",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "welcome",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "welcome:1",
+            "next": "mentor",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "mentor",
+          "kind": "skipped",
+          "detail": "when is false",
+          "snapshot": {
+            "facts": {
+              "student.prior_courses": 3
+            },
+            "next": "first_lesson",
+            "now": "2030-01-01T00:00:00Z",
+            "when": "facts.student.prior_courses == 0"
+          }
+        },
+        {
+          "at": "+0s",
+          "step": "first_lesson",
+          "kind": "waiting",
+          "detail": "lesson.completed",
+          "snapshot": {
+            "due_at": "2030-01-08T00:00:00Z",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+168h0m0s",
+          "step": "first_lesson",
+          "kind": "claimed",
+          "detail": "timeout",
+          "snapshot": {
+            "next": "nudge",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+168h0m0s",
+          "step": "nudge",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-08T00:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+168h0m0s",
+          "step": "nudge",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "nudge:1",
+            "next": "nudged",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+168h0m0s",
+          "step": "nudged",
+          "kind": "terminal",
+          "detail": "nudged"
+        }
+      ],
+      "calls": [
+        {
+          "step": "welcome",
+          "action": "send_email",
+          "key": "welcome:1",
+          "params": {
+            "template": "welcome",
+            "to": "s7@example.com",
+            "vars": {
+              "course": "go-101",
+              "name": "there"
+            }
+          }
+        },
+        {
+          "step": "nudge",
+          "action": "send_email",
+          "key": "nudge:1",
+          "params": {
+            "template": "nudge",
+            "to": "s7@example.com",
+            "vars": {
+              "mentor": "the team"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "definition": "lms-onboarding",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "student.enrolled",
+        "payload": {
+          "course_id": "db-201",
+          "email": "new@example.com",
+          "student_id": "s-new"
+        },
+        "occurred_at": "+30m0s"
+      },
+      "state": "completed",
+      "terminal": "onboarded",
+      "started": "+30m0s",
+      "ended": "+2h0m0s",
+      "steps": [
+        {
+          "at": "+30m0s",
+          "step": "welcome",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T00:30:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+30m0s",
+          "step": "welcome",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "welcome:1",
+            "next": "mentor",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+30m0s",
+          "step": "mentor",
+          "kind": "entered",
+          "detail": "assign_mentor",
+          "snapshot": {
+            "facts": {
+              "student.prior_courses": 0
+            },
+            "now": "2030-01-01T00:30:00Z",
+            "visit": 1,
+            "when": "facts.student.prior_courses == 0"
+          }
+        },
+        {
+          "at": "+30m0s",
+          "step": "mentor",
+          "kind": "executed",
+          "detail": "assign_mentor",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "mentor:1",
+            "next": "first_lesson",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+30m0s",
+          "step": "first_lesson",
+          "kind": "waiting",
+          "detail": "lesson.completed",
+          "snapshot": {
+            "due_at": "2030-01-08T00:30:00Z",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "first_lesson",
+          "kind": "claimed",
+          "detail": "event 6",
+          "snapshot": {
+            "event_id": 6,
+            "next": "badge",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "badge",
+          "kind": "entered",
+          "detail": "grant_badge",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T02:00:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "badge",
+          "kind": "executed",
+          "detail": "grant_badge",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "badge:1",
+            "next": "onboarded",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+2h0m0s",
+          "step": "onboarded",
+          "kind": "terminal",
+          "detail": "onboarded"
+        },
+        {
+          "at": "+168h30m0s",
+          "step": "first_lesson",
+          "kind": "claim_lost",
+          "detail": "timeout",
+          "snapshot": {
+            "wait_seq": 1
+          }
+        }
+      ],
+      "calls": [
+        {
+          "step": "welcome",
+          "action": "send_email",
+          "key": "welcome:1",
+          "params": {
+            "template": "welcome",
+            "to": "new@example.com",
+            "vars": {
+              "course": "db-201",
+              "name": "there"
+            }
+          }
+        },
+        {
+          "step": "mentor",
+          "action": "assign_mentor",
+          "key": "mentor:1",
+          "params": {
+            "course_id": "db-201",
+            "student_id": "s-new"
+          }
+        },
+        {
+          "step": "badge",
+          "action": "grant_badge",
+          "key": "badge:1",
+          "params": {
+            "badge": "first_steps",
+            "student_id": "s-new"
+          }
+        }
+      ]
+    },
+    {
+      "definition": "lms-onboarding",
+      "version": 1,
+      "metamodel_version": 1,
+      "trigger": {
+        "type": "student.enrolled",
+        "payload": {
+          "course_id": "go-101",
+          "email": "new@example.com",
+          "name": "An",
+          "student_id": "s-new"
+        },
+        "occurred_at": "+2h30m0s"
+      },
+      "state": "completed",
+      "terminal": "nudged",
+      "started": "+2h30m0s",
+      "ended": "+170h30m0s",
+      "steps": [
+        {
+          "at": "+2h30m0s",
+          "step": "welcome",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-01T02:30:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+2h30m0s",
+          "step": "welcome",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "welcome:1",
+            "next": "mentor",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+2h30m0s",
+          "step": "mentor",
+          "kind": "entered",
+          "detail": "assign_mentor",
+          "snapshot": {
+            "facts": {
+              "student.prior_courses": 0
+            },
+            "now": "2030-01-01T02:30:00Z",
+            "visit": 1,
+            "when": "facts.student.prior_courses == 0"
+          }
+        },
+        {
+          "at": "+2h30m0s",
+          "step": "mentor",
+          "kind": "executed",
+          "detail": "assign_mentor",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "mentor:1",
+            "next": "first_lesson",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+2h30m0s",
+          "step": "first_lesson",
+          "kind": "waiting",
+          "detail": "lesson.completed",
+          "snapshot": {
+            "due_at": "2030-01-08T02:30:00Z",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+170h30m0s",
+          "step": "first_lesson",
+          "kind": "claimed",
+          "detail": "timeout",
+          "snapshot": {
+            "next": "nudge",
+            "wait_seq": 1
+          }
+        },
+        {
+          "at": "+170h30m0s",
+          "step": "nudge",
+          "kind": "entered",
+          "detail": "send_email",
+          "snapshot": {
+            "facts": {},
+            "now": "2030-01-08T02:30:00Z",
+            "visit": 1,
+            "when": ""
+          }
+        },
+        {
+          "at": "+170h30m0s",
+          "step": "nudge",
+          "kind": "executed",
+          "detail": "send_email",
+          "snapshot": {
+            "cached": false,
+            "idem_key": "nudge:1",
+            "next": "nudged",
+            "visit": 1
+          }
+        },
+        {
+          "at": "+170h30m0s",
+          "step": "nudged",
+          "kind": "terminal",
+          "detail": "nudged"
+        }
+      ],
+      "calls": [
+        {
+          "step": "welcome",
+          "action": "send_email",
+          "key": "welcome:1",
+          "params": {
+            "template": "welcome",
+            "to": "new@example.com",
+            "vars": {
+              "course": "go-101",
+              "name": "An"
+            }
+          }
+        },
+        {
+          "step": "mentor",
+          "action": "assign_mentor",
+          "key": "mentor:1",
+          "params": {
+            "course_id": "go-101",
+            "student_id": "s-new"
+          }
+        },
+        {
+          "step": "nudge",
+          "action": "send_email",
+          "key": "nudge:1",
+          "params": {
+            "template": "nudge",
+            "to": "new@example.com",
+            "vars": {
+              "mentor": "mentor-go-101"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

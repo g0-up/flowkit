@@ -1,0 +1,5 @@
+{
+  "metamodel_version": 2,
+  "trigger": {"event": "order.paid"},
+  "steps": [{"id": "done", "type": "end", "name": "done"}]
+}

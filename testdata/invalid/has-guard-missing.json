@@ -1,0 +1,10 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "ship", "type": "action", "action": "create_shipment",
+     "params": {"order_id": {"$expr": "event.order_id"}, "country": {"$expr": "event.shipping.country"}},
+     "next": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

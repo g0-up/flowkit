@@ -1,0 +1,4 @@
+{
+  "metamodel_version": 1,
+  "steps": [{"id": "done", "type": "end", "name": "done"}]
+}

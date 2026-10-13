@@ -1,0 +1,10 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "reserve", "type": "action", "action": "reserve_inventory", "when": "event.total > 0.0",
+     "params": {"order_id": {"$expr": "event.order_id"}, "skus": [], "units": []}, "next": "in_stock"},
+    {"id": "in_stock", "type": "switch", "cases": [{"when": "facts.inventory.reserved", "next": "done"}], "default": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

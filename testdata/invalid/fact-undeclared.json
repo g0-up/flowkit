@@ -1,0 +1,8 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "route", "type": "switch", "cases": [{"when": "facts.customer.churn_risk > 0.5", "next": "done"}], "default": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

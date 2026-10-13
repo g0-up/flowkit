@@ -1,0 +1,13 @@
+{"emit": {"type": "student.enrolled", "payload": {"student_id": "s-new", "course_id": "go-101", "email": "new@example.com", "name": "An", "school_id": "hn"}}}
+{"emit": {"type": "student.enrolled", "payload": {"student_id": "returning-s7", "course_id": "go-101", "email": "s7@example.com"}}}
+{"advance": "30m"}
+{"emit": {"type": "student.enrolled", "payload": {"student_id": "s-new", "course_id": "go-101", "email": "new@example.com", "name": "An"}}}
+{"emit": {"type": "student.enrolled", "payload": {"student_id": "s-new", "course_id": "db-201", "email": "new@example.com"}}}
+{"advance": "1h30m"}
+{"emit": {"type": "lesson.completed", "payload": {"student_id": "s-new", "lesson_id": "go-101/1", "score": 40}}}
+{"emit": {"type": "lesson.completed", "payload": {"student_id": "s-new", "lesson_id": "go-101/2", "score": 80}}}
+{"advance": "30m"}
+{"emit": {"type": "student.enrolled", "payload": {"student_id": "s-new", "course_id": "go-101", "email": "new@example.com", "name": "An"}}}
+{"advance": "165h30m"}
+{"advance": "30m"}
+{"advance": "2h"}

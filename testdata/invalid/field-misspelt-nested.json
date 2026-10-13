@@ -1,0 +1,9 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "route", "type": "switch",
+     "cases": [{"when": "has(event.shipping) && event.shipping.contry == 'VN'", "next": "done"}], "default": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

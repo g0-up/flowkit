@@ -1,0 +1,10 @@
+{"emit": {"type": "order.paid", "payload": {"order_id": "vip-1001", "customer_id": "c-vip", "email": "vip@example.com", "total": 250.5, "items": [{"sku": "lamp", "qty": 2}], "shipping": {"country": "SG", "express": false}}}}
+{"emit": {"type": "order.paid", "payload": {"order_id": "o-2001", "customer_id": "c-regular", "email": "regular@example.com", "total": 40, "items": [{"sku": "mug", "qty": 1}]}}}
+{"emit": {"type": "order.paid", "payload": {"order_id": "o-2002", "customer_id": "c-regular", "email": "regular@example.com", "total": 12, "items": [{"sku": "spoon", "qty": 3}]}}}
+{"emit": {"type": "order.paid", "payload": {"order_id": "o-3001", "customer_id": "c-unlucky", "email": "unlucky@example.com", "total": 99.9, "items": [{"sku": "oos-chair", "qty": 1}, {"sku": "mug", "qty": 1}]}}}
+{"advance": "24h"}
+{"emit": {"type": "shipment.delivered", "payload": {"order_id": "vip-1001", "carrier": "test"}}}
+{"emit": {"type": "shipment.delivered", "payload": {"order_id": "vip-1001", "carrier": "dhl"}}}
+{"emit": {"type": "shipment.delivered", "payload": {"order_id": "o-2001"}}}
+{"advance": "312h"}
+{"advance": "24h"}

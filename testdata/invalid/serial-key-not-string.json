@@ -1,0 +1,6 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "concurrency": {"policy": "cancel_previous", "serial_key": "event.total"},
+  "steps": [{"id": "done", "type": "end", "name": "done"}]
+}

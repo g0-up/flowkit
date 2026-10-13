@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "flowkit workflow definition, metamodel version 1",
+  "$comment": "DRAFT (nháp): covers the trigger, concurrency and the four step types action, wait_for_event, switch and end. It is replaced when the official M2 metamodel is delivered; the internal model is independent of this JSON shape.",
+  "type": "object",
+  "required": ["metamodel_version", "trigger", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "metamodel_version": {"const": 1},
+    "description": {"type": "string", "maxLength": 4096},
+    "trigger": {
+      "type": "object",
+      "required": ["event"],
+      "additionalProperties": false,
+      "properties": {
+        "event": {"$ref": "#/$defs/event_type"}
+      }
+    },
+    "concurrency": {
+      "type": "object",
+      "required": ["policy"],
+      "additionalProperties": false,
+      "properties": {
+        "policy": {"enum": ["concurrent", "serial", "cancel_previous", "dedup_window"]},
+        "serial_key": {"$ref": "#/$defs/expression"},
+        "dedup_window": {"$ref": "#/$defs/duration"}
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/step"}
+    }
+  },
+  "$defs": {
+    "step_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.-]{0,63}$"
+    },
+    "event_type": {"type": "string", "minLength": 1, "maxLength": 255},
+    "expression": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "duration": {
+      "type": "string",
+      "pattern": "^([0-9]{1,9}[smhd])+$",
+      "maxLength": 64
+    },
+    "step": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {"enum": ["action", "wait_for_event", "switch", "end"]}
+      },
+      "allOf": [
+        {"if": {"properties": {"type": {"const": "action"}}}, "then": {"$ref": "#/$defs/action"}},
+        {"if": {"properties": {"type": {"const": "wait_for_event"}}}, "then": {"$ref": "#/$defs/wait_for_event"}},
+        {"if": {"properties": {"type": {"const": "switch"}}}, "then": {"$ref": "#/$defs/switch"}},
+        {"if": {"properties": {"type": {"const": "end"}}}, "then": {"$ref": "#/$defs/end"}}
+      ]
+    },
+    "action": {
+      "required": ["action", "next"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/step_id"},
+        "type": {"const": "action"},
+        "description": {"type": "string", "maxLength": 4096},
+        "action": {"type": "string", "minLength": 1, "maxLength": 255},
+        "params": {"type": "object"},
+        "when": {"$ref": "#/$defs/expression"},
+        "next": {"$ref": "#/$defs/step_id"}
+      }
+    },
+    "wait_for_event": {
+      "required": ["event", "timeout", "on_timeout", "next"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/step_id"},
+        "type": {"const": "wait_for_event"},
+        "description": {"type": "string", "maxLength": 4096},
+        "event": {"$ref": "#/$defs/event_type"},
+        "match": {"$ref": "#/$defs/expression"},
+        "timeout": {"$ref": "#/$defs/duration"},
+        "on_timeout": {"$ref": "#/$defs/step_id"},
+        "next": {"$ref": "#/$defs/step_id"}
+      }
+    },
+    "switch": {
+      "required": ["cases", "default"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/step_id"},
+        "type": {"const": "switch"},
+        "description": {"type": "string", "maxLength": 4096},
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "required": ["when", "next"],
+            "additionalProperties": false,
+            "properties": {
+              "when": {"$ref": "#/$defs/expression"},
+              "next": {"$ref": "#/$defs/step_id"}
+            }
+          }
+        },
+        "default": {"$ref": "#/$defs/step_id"}
+      }
+    },
+    "end": {
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/step_id"},
+        "type": {"const": "end"},
+        "description": {"type": "string", "maxLength": 4096},
+        "name": {"$ref": "#/$defs/step_id"}
+      }
+    }
+  }
+}

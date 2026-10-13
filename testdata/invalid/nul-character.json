@@ -1,0 +1,6 @@
+{
+  "metamodel_version": 1,
+  "description": "bad\u0000text",
+  "trigger": {"event": "order.paid"},
+  "steps": [{"id": "done", "type": "end", "name": "done"}]
+}

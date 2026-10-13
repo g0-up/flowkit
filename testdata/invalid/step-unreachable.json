@@ -1,0 +1,10 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "notify", "type": "action", "action": "send_email",
+     "params": {"to": {"$expr": "event.email"}, "template": "order_paid"}, "next": "done"},
+    {"id": "done", "type": "end", "name": "done"},
+    {"id": "orphan", "type": "end", "name": "orphan"}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "refund", "type": "action", "action": "refund_order",
+     "params": {"order_id": {"$expr": "event.order_id"}, "amount": 1e131072},
+     "next": "done"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}

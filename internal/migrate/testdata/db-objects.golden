@@ -1,0 +1,151 @@
+# Every database object in a schema migrated to flowkit library schema 1:
+# flowkit's own objects plus the signed River v0.49.0 allowlist.
+# Captured from the PostgreSQL 16 system catalogs; names are unqualified.
+# Regenerate: make pg-up, then
+#   go test ./internal/migrate -run TestDBObjects -update
+column_default river_job.attempt: 0
+column_default river_job.created_at: now()
+column_default river_job.id: nextval('river_job_id_seq'::regclass)
+column_default river_job.max_attempts: 25
+column_default river_job.metadata: '{}'::jsonb
+column_default river_job.priority: 1
+column_default river_job.queue: 'default'::text
+column_default river_job.scheduled_at: now()
+column_default river_job.state: 'available'::river_job_state
+column_default river_job.tags: '{}'::character varying[]
+column_default river_leader.name: 'default'::text
+column_default river_migration.created_at: now()
+column_default river_notification.created_at: now()
+column_default river_notification.id: nextval('river_notification_id_seq'::regclass)
+column_default river_queue.created_at: now()
+column_default river_queue.metadata: '{}'::jsonb
+column_default river_queue.updated_at: CURRENT_TIMESTAMP
+constraint component_refs.component_refs_kind_check: CHECK ((kind = ANY (ARRAY['event'::text, 'action'::text, 'fact'::text])))
+constraint component_refs.component_refs_pkey: PRIMARY KEY (def_name, def_version, kind, ref)
+constraint consumed_events.consumed_events_event_id_fkey: FOREIGN KEY (event_id) REFERENCES domain_events(id)
+constraint consumed_events.consumed_events_pkey: PRIMARY KEY (run_id, event_id)
+constraint consumed_events.consumed_events_run_id_fkey: FOREIGN KEY (run_id) REFERENCES runs(id)
+constraint dead_letters.dead_letters_kind_check: CHECK ((kind = ANY (ARRAY['unroutable_event'::text, 'schema_mismatch'::text, 'effect_in_doubt'::text, 'exhausted'::text])))
+constraint dead_letters.dead_letters_pkey: PRIMARY KEY (id)
+constraint dead_letters.dead_letters_resolution_check: CHECK ((resolution = ANY (ARRAY['redrive'::text, 'mark_done'::text, 'skip'::text])))
+constraint definition_versions.definition_versions_name_fkey: FOREIGN KEY (name) REFERENCES definitions(name)
+constraint definition_versions.definition_versions_pkey: PRIMARY KEY (name, version)
+constraint definitions.definitions_concurrency_policy_check: CHECK ((concurrency_policy = ANY (ARRAY['concurrent'::text, 'serial'::text, 'cancel_previous'::text, 'dedup_window'::text])))
+constraint definitions.definitions_pkey: PRIMARY KEY (name)
+constraint domain_events.domain_events_pkey: PRIMARY KEY (id)
+constraint drafts.drafts_pkey: PRIMARY KEY (id)
+constraint executed_effects.executed_effects_pkey: PRIMARY KEY (idem_key)
+constraint executed_effects.executed_effects_run_id_fkey: FOREIGN KEY (run_id) REFERENCES runs(id)
+constraint flowkit_meta.flowkit_meta_pkey: PRIMARY KEY (k)
+constraint rate_limits.rate_limits_pkey: PRIMARY KEY (def_name)
+constraint river_job.finalized_or_finalized_at_null: CHECK ((((finalized_at IS NULL) AND (state <> ALL (ARRAY['cancelled'::river_job_state, 'completed'::river_job_state, 'discarded'::river_job_state]))) OR ((finalized_at IS NOT NULL) AND (state = ANY (ARRAY['cancelled'::river_job_state, 'completed'::river_job_state, 'discarded'::river_job_state])))))
+constraint river_job.kind_length: CHECK (((char_length(kind) > 0) AND (char_length(kind) < 128)))
+constraint river_job.max_attempts_is_positive: CHECK ((max_attempts > 0))
+constraint river_job.priority_in_range: CHECK (((priority >= 1) AND (priority <= 4)))
+constraint river_job.queue_length: CHECK (((char_length(queue) > 0) AND (char_length(queue) < 128)))
+constraint river_job.river_job_pkey: PRIMARY KEY (id)
+constraint river_leader.leader_id_length: CHECK (((char_length(leader_id) > 0) AND (char_length(leader_id) < 128)))
+constraint river_leader.name_length: CHECK ((name = 'default'::text))
+constraint river_leader.river_leader_pkey: PRIMARY KEY (name)
+constraint river_migration.line_length: CHECK (((char_length(line) > 0) AND (char_length(line) < 128)))
+constraint river_migration.river_migration_pkey1: PRIMARY KEY (line, version)
+constraint river_migration.version_gte_1: CHECK ((version >= 1))
+constraint river_notification.river_notification_pkey: PRIMARY KEY (id)
+constraint river_notification.topic_length: CHECK (((length(topic) > 0) AND (length(topic) < 128)))
+constraint river_queue.river_queue_pkey: PRIMARY KEY (name)
+constraint run_queue.run_queue_pkey: PRIMARY KEY (def_name, serial_key, trigger_event_id)
+constraint run_queue.run_queue_trigger_event_id_fkey: FOREIGN KEY (trigger_event_id) REFERENCES domain_events(id)
+constraint run_steps.run_steps_pkey: PRIMARY KEY (run_id, seq)
+constraint run_steps.run_steps_run_id_fkey: FOREIGN KEY (run_id) REFERENCES runs(id)
+constraint run_summaries.run_summaries_pkey: PRIMARY KEY (run_id)
+constraint runs.runs_check: CHECK ((terminal = (state = ANY (ARRAY['completed'::text, 'failed'::text, 'cancelled'::text]))))
+constraint runs.runs_pkey: PRIMARY KEY (id)
+constraint runs.runs_state_check: CHECK ((state = ANY (ARRAY['running'::text, 'waiting'::text, 'completed'::text, 'failed'::text, 'cancelled'::text])))
+constraint runs.runs_trigger_event_id_fkey: FOREIGN KEY (trigger_event_id) REFERENCES domain_events(id)
+constraint serial_locks.serial_locks_pkey: PRIMARY KEY (def_name, serial_key)
+constraint subscriptions.subscriptions_pkey: PRIMARY KEY (run_id, wait_seq)
+constraint subscriptions.subscriptions_run_id_fkey: FOREIGN KEY (run_id) REFERENCES runs(id)
+enum river_job_state: available,cancelled,completed,discarded,pending,retryable,running,scheduled
+function river_job_state_in_bitmask(bit,river_job_state) returns boolean language=sql volatility=i body_md5=7564bd691aa4fe9f1d890d980123935c
+identity_column dead_letters.id: a
+identity_column domain_events.id: a
+index ce_event: CREATE INDEX ce_event ON consumed_events USING btree (event_id)
+index component_refs_pkey: CREATE UNIQUE INDEX component_refs_pkey ON component_refs USING btree (def_name, def_version, kind, ref)
+index consumed_events_pkey: CREATE UNIQUE INDEX consumed_events_pkey ON consumed_events USING btree (run_id, event_id)
+index cref_lookup: CREATE INDEX cref_lookup ON component_refs USING btree (kind, ref)
+index de_dedup: CREATE UNIQUE INDEX de_dedup ON domain_events USING btree (type, dedup_key) WHERE (dedup_key IS NOT NULL)
+index de_inserted: CREATE INDEX de_inserted ON domain_events USING btree (inserted_at)
+index de_type_inserted: CREATE INDEX de_type_inserted ON domain_events USING btree (type, inserted_at, id)
+index dead_letters_pkey: CREATE UNIQUE INDEX dead_letters_pkey ON dead_letters USING btree (id)
+index definition_versions_pkey: CREATE UNIQUE INDEX definition_versions_pkey ON definition_versions USING btree (name, version)
+index definitions_pkey: CREATE UNIQUE INDEX definitions_pkey ON definitions USING btree (name)
+index defs_trigger: CREATE INDEX defs_trigger ON definitions USING btree (trigger_event_type) WHERE enabled
+index dl_open_ref: CREATE UNIQUE INDEX dl_open_ref ON dead_letters USING btree (kind, ref) WHERE (resolved_at IS NULL)
+index dl_resolved_age: CREATE INDEX dl_resolved_age ON dead_letters USING btree (resolved_at) WHERE (resolved_at IS NOT NULL)
+index domain_events_pkey: CREATE UNIQUE INDEX domain_events_pkey ON domain_events USING btree (id)
+index drafts_pkey: CREATE UNIQUE INDEX drafts_pkey ON drafts USING btree (id)
+index effects_inflight: CREATE INDEX effects_inflight ON executed_effects USING btree (claimed_at) WHERE ((done_at IS NULL) AND (claimed_at IS NOT NULL) AND (NOT in_doubt))
+index effects_run: CREATE INDEX effects_run ON executed_effects USING btree (run_id)
+index executed_effects_pkey: CREATE UNIQUE INDEX executed_effects_pkey ON executed_effects USING btree (idem_key)
+index flowkit_meta_pkey: CREATE UNIQUE INDEX flowkit_meta_pkey ON flowkit_meta USING btree (k)
+index rate_limits_pkey: CREATE UNIQUE INDEX rate_limits_pkey ON rate_limits USING btree (def_name)
+index river_job_args_index: CREATE INDEX river_job_args_index ON river_job USING gin (args)
+index river_job_kind: CREATE INDEX river_job_kind ON river_job USING btree (kind)
+index river_job_metadata_index: CREATE INDEX river_job_metadata_index ON river_job USING gin (metadata)
+index river_job_pkey: CREATE UNIQUE INDEX river_job_pkey ON river_job USING btree (id)
+index river_job_prioritized_fetching_index: CREATE INDEX river_job_prioritized_fetching_index ON river_job USING btree (state, queue, priority, scheduled_at, id)
+index river_job_state_and_finalized_at_index: CREATE INDEX river_job_state_and_finalized_at_index ON river_job USING btree (state, finalized_at) WHERE (finalized_at IS NOT NULL)
+index river_job_unique_idx: CREATE UNIQUE INDEX river_job_unique_idx ON river_job USING btree (unique_key) WHERE ((unique_key IS NOT NULL) AND (unique_states IS NOT NULL) AND river_job_state_in_bitmask(unique_states, state))
+index river_leader_pkey: CREATE UNIQUE INDEX river_leader_pkey ON river_leader USING btree (name)
+index river_migration_pkey1: CREATE UNIQUE INDEX river_migration_pkey1 ON river_migration USING btree (line, version)
+index river_notification_created_at_idx: CREATE INDEX river_notification_created_at_idx ON river_notification USING btree (created_at)
+index river_notification_pkey: CREATE UNIQUE INDEX river_notification_pkey ON river_notification USING btree (id)
+index river_notification_topic_id_idx: CREATE INDEX river_notification_topic_id_idx ON river_notification USING btree (topic, id)
+index river_queue_pkey: CREATE UNIQUE INDEX river_queue_pkey ON river_queue USING btree (name)
+index rq_event: CREATE INDEX rq_event ON run_queue USING btree (trigger_event_id, def_name)
+index rq_pop: CREATE INDEX rq_pop ON run_queue USING btree (def_name, serial_key, event_at, trigger_event_id)
+index rs_def_ended: CREATE INDEX rs_def_ended ON run_summaries USING btree (def_name, ended_at)
+index rs_def_started: CREATE INDEX rs_def_started ON run_summaries USING btree (def_name, started_at DESC, run_id DESC)
+index rs_entity: CREATE INDEX rs_entity ON run_summaries USING btree (entity_kind, entity_id, started_at) WHERE (entity_kind IS NOT NULL)
+index rs_started: CREATE INDEX rs_started ON run_summaries USING btree (started_at DESC, run_id DESC)
+index run_queue_pkey: CREATE UNIQUE INDEX run_queue_pkey ON run_queue USING btree (def_name, serial_key, trigger_event_id)
+index run_steps_pkey: CREATE UNIQUE INDEX run_steps_pkey ON run_steps USING btree (run_id, seq)
+index run_summaries_pkey: CREATE UNIQUE INDEX run_summaries_pkey ON run_summaries USING btree (run_id)
+index runs_dedup: CREATE INDEX runs_dedup ON runs USING btree (def_name, serial_key, created_at) WHERE (serial_key IS NOT NULL)
+index runs_def_started: CREATE INDEX runs_def_started ON runs USING btree (def_name, created_at DESC, id DESC)
+index runs_def_state: CREATE INDEX runs_def_state ON runs USING btree (def_name, state) WHERE (NOT terminal)
+index runs_entity: CREATE INDEX runs_entity ON runs USING btree (entity_kind, entity_id, created_at) WHERE (entity_kind IS NOT NULL)
+index runs_lookback: CREATE INDEX runs_lookback ON runs USING btree (updated_at) WHERE lookback_pending
+index runs_pkey: CREATE UNIQUE INDEX runs_pkey ON runs USING btree (id)
+index runs_serial_active: CREATE UNIQUE INDEX runs_serial_active ON runs USING btree (def_name, serial_key) WHERE (exclusive AND (NOT terminal))
+index runs_started: CREATE INDEX runs_started ON runs USING btree (created_at DESC, id DESC)
+index runs_terminal_age: CREATE INDEX runs_terminal_age ON runs USING btree (updated_at) WHERE terminal
+index runs_trigger: CREATE INDEX runs_trigger ON runs USING btree (trigger_event_id)
+index serial_locks_pkey: CREATE UNIQUE INDEX serial_locks_pkey ON serial_locks USING btree (def_name, serial_key)
+index subs_type: CREATE INDEX subs_type ON subscriptions USING btree (event_type)
+index subscriptions_pkey: CREATE UNIQUE INDEX subscriptions_pkey ON subscriptions USING btree (run_id, wait_seq)
+sequence dead_letters_id_seq
+sequence domain_events_id_seq
+sequence river_job_id_seq
+sequence river_notification_id_seq
+table component_refs
+table consumed_events
+table dead_letters
+table definition_versions
+table definitions
+table domain_events
+table drafts
+table executed_effects
+table flowkit_meta
+table rate_limits
+table river_job
+table river_leader UNLOGGED
+table river_migration
+table river_notification
+table river_queue
+table run_queue
+table run_steps
+table run_summaries
+table runs
+table serial_locks
+table subscriptions

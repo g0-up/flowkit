@@ -1,0 +1,12 @@
+{
+  "metamodel_version": 1,
+  "trigger": {"event": "order.paid"},
+  "steps": [
+    {"id": "route", "type": "switch", "cases": [{"when": "event.total > 100.0", "next": "done"}], "default": "remind"},
+    {"id": "remind", "type": "action", "action": "send_email",
+     "params": {"to": {"$expr": "event.email"}, "template": "reminder"}, "next": "remind_again"},
+    {"id": "remind_again", "type": "action", "action": "send_email",
+     "params": {"to": {"$expr": "event.email"}, "template": "reminder"}, "next": "remind"},
+    {"id": "done", "type": "end", "name": "done"}
+  ]
+}
