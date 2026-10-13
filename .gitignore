@@ -1,0 +1,15 @@
+# Secrets and local environment files never belong in the repo.
+.env*
+*.env
+
+# Build and test output.
+/bin/
+/dist/
+*.test
+*.out
+coverage.*
+
+# Editor and OS noise.
+.DS_Store
+.idea/
+.vscode/

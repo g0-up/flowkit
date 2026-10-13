@@ -1,0 +1,17 @@
+# Local Postgres for tests only. The password below is a throwaway test value.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: flowkit
+      POSTGRES_PASSWORD: flowkit
+      POSTGRES_DB: flowkit_test
+    ports:
+      - "55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowkit -d flowkit_test"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    tmpfs:
+      - /var/lib/postgresql/data
