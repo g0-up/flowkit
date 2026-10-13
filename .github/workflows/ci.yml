@@ -1,0 +1,141 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: go ${{ matrix.go }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.26.x", "1.27.x"]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: flowkit
+          POSTGRES_PASSWORD: flowkit
+          POSTGRES_DB: flowkit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U flowkit -d flowkit_test"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      # Throwaway credentials of the CI service container above.
+      FLOWKIT_TEST_DATABASE_URL: postgres://flowkit:flowkit@localhost:5432/flowkit_test?sslmode=disable
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache-dependency-path: |
+            go.sum
+            tools/go.sum
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: staticcheck
+        run: go tool -modfile=tools/go.mod staticcheck ./...
+
+      - name: sqlc generated code is current
+        run: make sqlc-check
+
+      - name: go test
+        run: go test -race ./...
+
+  # The public API against api/freeze-v1.txt, reserved names, job kinds and
+  # queues, and the guard on test hooks. No database needed.
+  freeze:
+    runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: go.sum
+
+      - name: public API freeze
+        run: make freeze
+
+  # Definitions and events recorded in testdata/corpus replayed on a real
+  # Engine; the schema must hold no object created at runtime afterwards.
+  corpus:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: flowkit
+          POSTGRES_PASSWORD: flowkit
+          POSTGRES_DB: flowkit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U flowkit -d flowkit_test"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      # Throwaway credentials of the CI service container above.
+      FLOWKIT_TEST_DATABASE_URL: postgres://flowkit:flowkit@localhost:5432/flowkit_test?sslmode=disable
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: go.sum
+
+      - name: corpus compatibility
+        run: make corpus
+
+  # Kills real worker processes at every crash point, 50 rounds each, and
+  # checks recovery. About two minutes, so it runs on every pull request.
+  chaos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: flowkit
+          POSTGRES_PASSWORD: flowkit
+          POSTGRES_DB: flowkit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U flowkit -d flowkit_test"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      # Throwaway credentials of the CI service container above.
+      FLOWKIT_TEST_DATABASE_URL: postgres://flowkit:flowkit@localhost:5432/flowkit_test?sslmode=disable
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          cache-dependency-path: go.sum
+
+      - name: chaos
+        run: make chaos
