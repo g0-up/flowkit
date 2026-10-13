@@ -1,0 +1,63 @@
+# Prometheus alert rules for flowkit. Metric names assume the OpenTelemetry
+# Prometheus exporter's default translation: dots become underscores,
+# counters gain _total and histograms in seconds gain _seconds. See
+# contrib/README.md before importing.
+#
+# The gauges flowkit_dead_letters_open, flowkit_in_doubt_open and
+# flowkit_queue_depth are read from the database by every instance, so each
+# instance reports the same value: aggregate them with max, never sum.
+groups:
+  - name: flowkit
+    rules:
+      - alert: FlowkitDeadLettersOpen
+        expr: max by (kind) (flowkit_dead_letters_open) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "flowkit has {{ $value }} open dead letters of kind {{ $labels.kind }}"
+          description: "Find them in the dead_letters table and resolve each with Runs().ResolveDeadLetter (docs/runbook-engine.md, ResolveDeadLetter)."
+
+      - alert: FlowkitEffectInDoubt
+        expr: max(flowkit_in_doubt_open) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "flowkit has {{ $value }} effects in doubt"
+          description: "A non-idempotent action may or may not have taken effect. The run stays blocked until a person checks the provider and resolves the effect_in_doubt dead letter."
+
+      - alert: FlowkitEffectOrphaned
+        expr: sum(increase(flowkit_effect_orphaned_total[15m])) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "an action finished after the janitor revoked its claim"
+          description: "ClaimTimeout is shorter than some action takes, or a worker stalled. The effect is held in doubt; raise ClaimTimeout or the action's deadline."
+
+      - alert: FlowkitTimerLag
+        expr: histogram_quantile(0.95, sum by (le) (rate(flowkit_timer_lag_seconds_bucket[10m]))) > 60
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "wait timeouts fire {{ $value }}s after their due time (p95)"
+          description: "Check that a janitor instance leads, that its host clock is synced (NTP) and that the workers keep up with flowkit_queue_depth."
+
+      - alert: FlowkitWakeLatency
+        expr: histogram_quantile(0.95, sum by (le) (rate(flowkit_wake_latency_seconds_bucket[10m]))) > 30
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "waits resume {{ $value }}s after their event is stored (p95)"
+          description: "Workers lag behind the flowkit queue, or LISTEN/NOTIFY is off and PollInterval is long."
+
+      - alert: FlowkitNoSchedulerLeader
+        expr: (max(flowkit_scheduler_leader) or vector(0)) < 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "no flowkit instance has been the scheduler leader for 5 minutes"
+          description: "Without a leader no wait timeout fires, no stuck job is rescued and the janitor does not run. Start an instance with RoleJanitor."
